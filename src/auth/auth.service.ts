@@ -10,6 +10,10 @@ export class AuthService {
   constructor(private jwtService: JwtService) {}
   async register(data: IUserReg) {
     const { password, email } = data;
+    const cust = await User.findOneBy({ email });
+    if (cust) {
+      throw RequestError(409, 'Email in use');
+    }
     const hashPassword = await bcrypt.hash(password, 10);
     const result = await User.create({
       ...data,
@@ -32,6 +36,9 @@ export class AuthService {
   async login(data: IUserLog) {
     const { email, password } = data;
     const user = await User.findOneBy({ email });
+    if (!user) {
+      throw RequestError(401, 'Email or password wrong');
+    }
     const passwordCompare = await bcrypt.compare(password, user!.password);
     if (!passwordCompare) {
       throw RequestError(401, 'Email or password wrong');

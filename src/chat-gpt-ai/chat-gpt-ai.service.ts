@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { OpenAI } from 'openai';
+import { IUser } from '../types/user.types';
+import { IQuestion } from '../types/qestion.type';
+import { Frase } from '../entities/frase.entities';
 
 @Injectable()
 export class ChatGptAiService {
@@ -10,14 +13,38 @@ export class ChatGptAiService {
       apiKey: process.env.OPENAI_API_KEY,
     });
   }
-  async getModeAnswer(question: string, temperature?: number) {
+  async getModeAnswer(body: IQuestion, user: IUser) {
     try {
-      const res = await this.openApi.completions.create({
-        prompt: question,
-        model: 'gpt-3.5-turbo',
-        temperature: temperature != undefined ? temperature : 0.9,
+      const ques = await Frase.create({
+        text: body.question,
+        isHuman: true,
+        ownerId: user.id,
+        createAT: new Date(),
       });
-      return JSON.stringify(res.choices);
+      ques.save();
+      const res = await this.openApi.chat.completions.create({
+        messages: [{ role: 'assistant', content: body.question }],
+        model: 'gpt-3.5-turbo',
+      });
+      const result = await Frase.create({
+        text: res.choices[0].message.content,
+        isHuman: false,
+        ownerId: user.id,
+        createAT: new Date(),
+      });
+      result.save();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getDiolog(user: IUser) {
+    try {
+      const result = await Frase.find({
+        where: [{ ownerId: user.id }],
+        order: { createAT: 'ASC' },
+      });
+      return result;
     } catch (error) {
       return error;
     }
