@@ -9,28 +9,31 @@ import { RequestError } from '../helpers/RequestError';
 export class AuthService {
   constructor(private jwtService: JwtService) {}
   async register(data: IUserReg) {
-    const { password, email } = data;
-    const cust = await User.findOneBy({ email });
-    if (cust) {
-      throw RequestError(409, 'Email in use');
-    }
-    const hashPassword = await bcrypt.hash(password, 10);
-    const result = await User.create({
-      ...data,
-      password: hashPassword,
-      token: '',
-    });
-    result.save();
-    const user = await User.findOneBy({ email });
-    const payload = {
-      id: user.id,
-    };
+    try {
+      const { password, email } = data;
+      const cust = await User.findOneBy({ email });
+      if (cust) {
+        throw RequestError(409, 'Email in use');
+      }
+      const hashPassword = await bcrypt.hash(password, 10);
+      const result = await User.create({
+        ...data,
+        password: hashPassword,
+        token: '',
+      });
+      result.save();
 
-    const token = await this.jwtService.signAsync(payload);
-    await User.update({ id: user.id }, { token });
-    return {
-      token,
-    };
+      const payload = {
+        email: result.email,
+      };
+      const token = await this.jwtService.signAsync(payload);
+      await User.update({ email: result.email }, { token });
+      return {
+        token,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async login(data: IUserLog) {

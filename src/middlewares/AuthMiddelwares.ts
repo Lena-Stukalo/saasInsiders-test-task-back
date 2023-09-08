@@ -7,7 +7,7 @@ import { User } from '../entities/user.entities';
 import { IUser } from '../types/user.types';
 
 export interface IDecoded {
-  id: string;
+  email: string;
 }
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
@@ -23,7 +23,7 @@ export class AuthMiddleware implements NestMiddleware {
       const payload = (await this.jwtService.verifyAsync(token, {
         secret: process.env.SECRET_KEY!,
       })) as IDecoded;
-      const user = (await User.findOneBy({ id: payload.id })) as IUser;
+      const user = (await User.findOneBy({ email: payload.email })) as IUser;
       if (!user || user.token !== token) {
         throw RequestError(401, 'Unauthorized');
       }
