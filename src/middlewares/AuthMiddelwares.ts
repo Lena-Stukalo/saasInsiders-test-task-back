@@ -14,7 +14,6 @@ export class AuthMiddleware implements NestMiddleware {
   constructor(private jwtService: JwtService) {}
   async use(req: CustomRequest, _: Response, next: NextFunction): Promise<any> {
     const auth: string | undefined = req.headers['authorization'];
-    console.log('auth mid');
     try {
       const [bearer, token] = auth.split(' ');
       if (bearer !== 'Bearer') {
