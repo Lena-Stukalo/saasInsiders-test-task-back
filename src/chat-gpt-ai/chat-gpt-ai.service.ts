@@ -33,7 +33,7 @@ export class ChatGptAiService {
         createAT: new Date(),
       });
       result.save();
-      return result;
+      return [ques, result];
     } catch (error) {
       throw error;
     }
