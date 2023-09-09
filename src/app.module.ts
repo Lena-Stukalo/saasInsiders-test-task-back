@@ -7,6 +7,9 @@ import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './middlewares/AuthMiddelwares';
 import { AuthController } from './auth/auth.controller';
 import { ChatGptAiController } from './chat-gpt-ai/chat-gpt-ai.controller';
+import { validateBody } from './middlewares/VaidateBodyMiddlwarws';
+import { questionSchema } from './schemas/quest.schema';
+import { userSchemaLog, userSchemaReg } from './schemas/auth.schema';
 
 @Module({
   imports: [ChatGptAiModule, ConfigModule.forRoot(), AuthModule],
@@ -19,5 +22,10 @@ export class AppModule implements NestModule {
       .apply(AuthMiddleware)
       .exclude('auth/register', 'auth/login')
       .forRoutes(AuthController, ChatGptAiController);
+    consumer
+      .apply(validateBody(questionSchema))
+      .forRoutes('chat-gpt-ai/question');
+    consumer.apply(validateBody(userSchemaReg)).forRoutes('auth/register');
+    consumer.apply(validateBody(userSchemaLog)).forRoutes('auth/login');
   }
 }
