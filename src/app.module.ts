@@ -10,11 +10,12 @@ import { ChatGptAiController } from './chat-gpt-ai/chat-gpt-ai.controller';
 import { validateBody } from './middlewares/VaidateBodyMiddlwarws';
 import { questionSchema } from './schemas/quest.schema';
 import { userSchemaLog, userSchemaReg } from './schemas/auth.schema';
+import { ChatGateway } from './chat/chat.gateway';
 
 @Module({
   imports: [ChatGptAiModule, ConfigModule.forRoot(), AuthModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

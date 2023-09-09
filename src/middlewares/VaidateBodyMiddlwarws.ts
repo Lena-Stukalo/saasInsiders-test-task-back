@@ -6,7 +6,6 @@ import { ErrorWithStatus } from '../types/error.type';
 export const validateBody =
   (Shema: Joi.ObjectSchema) =>
   (req: Request, res: Response, next: NextFunction) => {
-    console.log('validate mid');
     try {
       const { error } = Shema.validate(req.body);
       if (error) {
